@@ -1,0 +1,15 @@
+{
+  "name": "@codexporer.io/expo-message-dialog",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "peerDependencies": {
+    "react": "*",
+    "react-sweet-state": "*",
+    "lodash": "*",
+    "styled-components": "*",
+    "react-native-paper": "*",
+    "@expo/vector-icons": "*",
+    "react-magnetic-di": "*",
+    "@codexporer.io/react-test-utils": "*"
+  }
+}
