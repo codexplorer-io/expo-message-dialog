@@ -1,3 +1,4 @@
+import noop from 'lodash/noop';
 import { Store, MESSAGE_DIALOG_TYPE } from './store';
 
 describe('store', () => {
@@ -121,13 +122,27 @@ describe('store', () => {
         it('should close modal', () => {
             const { actions: { close } } = Store;
             const setState = jest.fn();
-            const getState = jest.fn(() => ({ isOpen: true }));
+            const getState = jest.fn(() => ({
+                isOpen: true,
+                actions: [
+                    { id: '1', handler: jest.fn(), text: 'action mock 1' },
+                    { id: '2', handler: jest.fn(), text: 'action mock 2' }
+                ]
+            }));
             const thunk = close();
 
             thunk({ getState, setState });
 
             expect(setState).toHaveBeenCalledTimes(1);
-            expect(setState).toHaveBeenCalledWith(Store.initialState);
+            expect(setState).toHaveBeenCalledWith({
+                isOpen: false,
+                actions: [
+                    { id: '1', handler: noop, text: 'action mock 1' },
+                    { id: '2', handler: noop, text: 'action mock 2' }
+                ],
+                onOpen: null,
+                onClose: null
+            });
         });
 
         it('should call onClose', () => {
@@ -140,7 +155,12 @@ describe('store', () => {
             thunk({ getState, setState });
 
             expect(setState).toHaveBeenCalledTimes(1);
-            expect(setState).toHaveBeenCalledWith(Store.initialState);
+            expect(setState).toHaveBeenCalledWith({
+                isOpen: false,
+                actions: [],
+                onOpen: null,
+                onClose: null
+            });
             expect(onClose).toHaveBeenCalledTimes(1);
         });
 

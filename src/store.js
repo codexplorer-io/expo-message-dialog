@@ -2,6 +2,8 @@ import {
     createStore,
     createHook
 } from 'react-sweet-state';
+import map from 'lodash/map';
+import noop from 'lodash/noop';
 
 export const MESSAGE_DIALOG_TYPE = {
     none: 'none',
@@ -48,12 +50,21 @@ export const Store = createStore({
             onOpen?.();
         },
         close: () => ({ getState, setState }) => {
-            const { isOpen, onClose } = getState();
+            const { isOpen, onClose, actions: oldActions } = getState();
             if (!isOpen) {
                 return;
             }
 
-            setState(initialState);
+            const actions = map(oldActions, action => ({
+                ...action,
+                handler: noop
+            }));
+            setState({
+                isOpen: false,
+                actions,
+                onOpen: null,
+                onClose: null
+            });
             onClose?.();
         }
     },
