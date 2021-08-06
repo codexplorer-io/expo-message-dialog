@@ -46,14 +46,14 @@ describe('MessageDialog', () => {
 
     const defaultDeps = [
         injectable(AntDesign, createMockComponent('AntDesign')),
-        injectable(Button, createMockComponent('Button', { hasChildren: true })),
-        injectable(Dialog, createMockComponent('Dialog', { hasChildren: true })),
-        injectable(DialogActions, createMockComponent('DialogActions', { hasChildren: true })),
-        injectable(DialogContent, createMockComponent('DialogContent', { hasChildren: true })),
-        injectable(ModalTitle, createMockComponent('ModalTitle', { hasChildren: true })),
-        injectable(ModalTitleText, createMockComponent('ModalTitleText', { hasChildren: true })),
-        injectable(Paragraph, createMockComponent('Paragraph', { hasChildren: true })),
-        injectable(Portal, createMockComponent('Portal', { hasChildren: true })),
+        injectable(Button, createMockComponent('Button')),
+        injectable(Dialog, createMockComponent('Dialog')),
+        injectable(DialogActions, createMockComponent('DialogActions')),
+        injectable(DialogContent, createMockComponent('DialogContent')),
+        injectable(ModalTitle, createMockComponent('ModalTitle')),
+        injectable(ModalTitleText, createMockComponent('ModalTitleText')),
+        injectable(Paragraph, createMockComponent('Paragraph')),
+        injectable(Portal, createMockComponent('Portal')),
         injectable(useMessageDialog, useMessageDialogMock),
         injectable(useTheme, useThemeMock)
     ];
