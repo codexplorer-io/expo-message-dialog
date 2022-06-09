@@ -16,6 +16,7 @@ const initialState = {
     isOpen: false,
     title: '',
     message: '',
+    renderContent: null,
     type: MESSAGE_DIALOG_TYPE.none,
     actions: [],
     onOpen: null,
@@ -28,6 +29,7 @@ export const Store = createStore({
         open: ({
             title = '',
             message,
+            renderContent = null,
             type = MESSAGE_DIALOG_TYPE.none,
             actions,
             onOpen = null,
@@ -42,12 +44,31 @@ export const Store = createStore({
                 isOpen: true,
                 title,
                 message,
+                renderContent,
                 type,
                 actions,
                 onOpen,
                 onClose
             });
             onOpen?.();
+        },
+        updateState: ({
+            title = '',
+            message,
+            renderContent = null,
+            actions
+        }) => ({ getState, setState }) => {
+            const { isOpen } = getState();
+            if (!isOpen) {
+                return;
+            }
+
+            setState({
+                title,
+                message,
+                renderContent,
+                actions
+            });
         },
         close: () => ({ getState, setState }) => {
             const { isOpen, onClose, actions: oldActions } = getState();

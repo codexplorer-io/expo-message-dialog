@@ -117,12 +117,14 @@ useMessageDialogActions|hook used to control message dialog visibility|
 MESSAGE_DIALOG_TYPE|constant used for rendering styled message dialog|
 
 ## useMessageDialogActions
-Returns an array with `open` and `close` close actions on the second index:
+Returns an array with `open`, `updateState` and `close` actions on the second index:
 ```
-const [, { open, close }] = useMessageDialogActions();
+const [, { open, updateState, close }] = useMessageDialogActions();
 
 ...
-open(... open action parameters);
+open(...open action parameters);
+...
+updateState(...updated state);
 ...
 close();
 ```
@@ -132,7 +134,8 @@ parameter|description|
 -|-|
 title|optional message dialog title (default: empty string)|
 message|message dialog message|
+renderContent|custom render content function to replace the message (default: null)|
 type|optional message dialog type (default: MESSAGE_DIALOG_TYPE.none)|
-actions|optional message dialog actions, array with objects of shape `[{ id: 'unique string action id', handler: () => { /* invoked when button is clicked*/ }, text: 'Action button label' }, ...]`|
+actions|optional message dialog actions, array with objects of shape `[{ id: 'unique string action id', handler: () => { /* invoked when button is clicked*/ }, text: 'Action button label', color: 'red', mode: 'contained', isDisabled: true }, ...]`|
 onOpen|optinal callback when dialog is open|
 onClose|optinal callback when dialog is closed|

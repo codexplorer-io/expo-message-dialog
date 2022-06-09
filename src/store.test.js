@@ -11,6 +11,7 @@ describe('store', () => {
         expect(initialState).toStrictEqual({
             isOpen: false,
             title: '',
+            renderContent: null,
             message: '',
             type: MESSAGE_DIALOG_TYPE.none,
             actions: [],
@@ -19,6 +20,7 @@ describe('store', () => {
         });
         expect(actions).toStrictEqual({
             open: expect.any(Function),
+            updateState: expect.any(Function),
             close: expect.any(Function)
         });
     });
@@ -30,7 +32,8 @@ describe('store', () => {
             const getState = jest.fn(() => ({ isOpen: false }));
             const thunk = open({
                 message: 'mock message',
-                actions: ['mock action 1', 'mock action 2']
+                actions: ['mock action 1', 'mock action 2'],
+                renderContent: 'mock function'
             });
 
             thunk({ getState, setState });
@@ -42,6 +45,7 @@ describe('store', () => {
                 message: 'mock message',
                 type: MESSAGE_DIALOG_TYPE.none,
                 actions: ['mock action 1', 'mock action 2'],
+                renderContent: 'mock function',
                 onOpen: null,
                 onClose: null
             });
@@ -110,6 +114,46 @@ describe('store', () => {
             const thunk = open({
                 message: 'mock message',
                 actions: ['mock action 1', 'mock action 2']
+            });
+
+            thunk({ getState, setState });
+
+            expect(setState).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('updateState', () => {
+        it('should update modal state', () => {
+            const { actions: { updateState } } = Store;
+            const setState = jest.fn();
+            const getState = jest.fn(() => ({ isOpen: true }));
+            const thunk = updateState({
+                title: 'mock title',
+                message: 'mock message',
+                actions: ['mock action 1', 'mock action 2'],
+                renderContent: 'mock function'
+            });
+
+            thunk({ getState, setState });
+
+            expect(setState).toHaveBeenCalledTimes(1);
+            expect(setState).toHaveBeenCalledWith({
+                title: 'mock title',
+                message: 'mock message',
+                actions: ['mock action 1', 'mock action 2'],
+                renderContent: 'mock function'
+            });
+        });
+
+        it('should not update modal state if modal is closed', () => {
+            const { actions: { updateState } } = Store;
+            const setState = jest.fn();
+            const getState = jest.fn(() => ({ isOpen: false }));
+            const thunk = updateState({
+                title: 'mock title',
+                message: 'mock message',
+                actions: ['mock action 1', 'mock action 2'],
+                renderContent: 'mock function'
             });
 
             thunk({ getState, setState });

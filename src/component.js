@@ -94,6 +94,7 @@ export const MessageDialog = () => {
         isOpen,
         title,
         message,
+        renderContent,
         type,
         actions
     }, { close }] = useMessageDialog();
@@ -112,13 +113,35 @@ export const MessageDialog = () => {
                     </ModalTitle>
                 ) : null}
                 <DialogContent>
-                    <Paragraph>{message}</Paragraph>
+                    {renderContent ?
+                        renderContent() : (
+                            <Paragraph>{message}</Paragraph>
+                        )
+                    }
                 </DialogContent>
                 {actions?.length > 0 && (
                     <DialogActions>
-                        {map(actions, ({ id, handler, text }) => (
-                            <Button key={id} onPress={handler}>{text}</Button>
-                        ))}
+                        {map(
+                            actions,
+                            ({
+                                id,
+                                handler,
+                                text,
+                                color,
+                                mode,
+                                isDisabled
+                            }) => (
+                                <Button
+                                    key={id}
+                                    onPress={handler}
+                                    disabled={isDisabled}
+                                    color={color}
+                                    mode={mode}
+                                >
+                                    {text}
+                                </Button>
+                            )
+                        )}
                     </DialogActions>
                 )}
             </Dialog>

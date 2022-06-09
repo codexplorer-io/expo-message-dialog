@@ -28,8 +28,19 @@ describe('MessageDialog', () => {
         message = 'mock message',
         type = MESSAGE_DIALOG_TYPE.none,
         actions = [
-            { id: '1', handler: handler1Mock, text: 'button mock 1' },
-            { id: '2', handler: handler2Mock, text: 'button mock 2' }
+            {
+                id: '1',
+                handler: handler1Mock,
+                text: 'button mock 1'
+            },
+            {
+                id: '2',
+                handler: handler2Mock,
+                text: 'button mock 2',
+                color: 'mock color',
+                mode: 'mock mode',
+                isDisabled: true
+            }
         ]
     }) => {
         useMessageDialogMock.mockReturnValue([
@@ -209,7 +220,10 @@ describe('MessageDialog', () => {
         // eslint-disable-next-line lodash/prefer-lodash-method
         expect(actions.find('Button').at(1).props()).toEqual({
             onPress: handler2Mock,
-            children: 'button mock 2'
+            children: 'button mock 2',
+            color: 'mock color',
+            mode: 'mock mode',
+            disabled: true
         });
     });
 
