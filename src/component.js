@@ -1,6 +1,6 @@
 import React from 'react';
 import map from 'lodash/map';
-import styled from 'styled-components/native';
+import styled, { css } from 'styled-components/native';
 import {
     Button,
     Paragraph,
@@ -33,6 +33,18 @@ export const ModalTitle = styled.View`
 export const ModalTitleText = styled(Title)`
     margin-left: ${({ messageType }) => messageType !== MESSAGE_DIALOG_TYPE.none ? '10px' : 0};
     color: ${({ messageType, theme: { colors } }) => getColor({ type: messageType, colors })};
+`;
+
+export const Buttons = styled.View`
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+`;
+
+export const ButtonWrapper = styled.View`
+    padding-bottom: 5px;
+    ${({ hasPadding }) => hasPadding && css`padding-left: 5px;`}
 `;
 
 const iconsMap = {
@@ -79,6 +91,8 @@ const DialogActions = Dialog.Actions;
 export const MessageDialog = () => {
     di(
         Button,
+        ButtonWrapper,
+        Buttons,
         Dialog,
         DialogActions,
         DialogContent,
@@ -121,27 +135,33 @@ export const MessageDialog = () => {
                 </DialogContent>
                 {actions?.length > 0 && (
                     <DialogActions>
-                        {map(
-                            actions,
-                            ({
-                                id,
-                                handler,
-                                text,
-                                color,
-                                mode,
-                                isDisabled
-                            }) => (
-                                <Button
-                                    key={id}
-                                    onPress={handler}
-                                    disabled={isDisabled}
-                                    color={color}
-                                    mode={mode}
-                                >
-                                    {text}
-                                </Button>
-                            )
-                        )}
+                        <Buttons>
+                            {map(
+                                actions,
+                                ({
+                                    id,
+                                    handler,
+                                    text,
+                                    color,
+                                    mode,
+                                    isDisabled
+                                }, index) => (
+                                    <ButtonWrapper
+                                        key={id}
+                                        hasPadding={index > 0}
+                                    >
+                                        <Button
+                                            onPress={handler}
+                                            disabled={isDisabled}
+                                            color={color}
+                                            mode={mode}
+                                        >
+                                            {text}
+                                        </Button>
+                                    </ButtonWrapper>
+                                )
+                            )}
+                        </Buttons>
                     </DialogActions>
                 )}
             </Dialog>
