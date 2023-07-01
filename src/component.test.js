@@ -9,20 +9,24 @@ import {
 } from 'react-native-paper';
 import { AntDesign } from '@expo/vector-icons';
 import { createMockComponent, mountWithDi } from '@codexporer.io/react-test-utils';
-import { useMessageDialog, MESSAGE_DIALOG_TYPE } from './store';
+import {
+    useMessageDialogState,
+    useMessageDialogActions,
+    MESSAGE_DIALOG_TYPE
+} from './store';
 import { MessageDialog, ModalTitle, ModalTitleText } from './component';
 
 const DialogContent = Dialog.Content;
 const DialogActions = Dialog.Actions;
 
 describe('MessageDialog', () => {
-    const useMessageDialogMock = jest.fn();
+    const useMessageDialogStateMock = jest.fn();
     const useThemeMock = jest.fn();
     const closeMessageDialogMock = jest.fn();
     const handler1Mock = jest.fn();
     const handler2Mock = jest.fn();
 
-    const mockUseMessageDialog = ({
+    const mockUseMessageDialogState = ({
         isOpen = false,
         title = 'mock title',
         message = 'mock message',
@@ -43,16 +47,13 @@ describe('MessageDialog', () => {
             }
         ]
     }) => {
-        useMessageDialogMock.mockReturnValue([
-            {
-                isOpen,
-                title,
-                message,
-                type,
-                actions
-            },
-            { close: closeMessageDialogMock }
-        ]);
+        useMessageDialogStateMock.mockReturnValue({
+            isOpen,
+            title,
+            message,
+            type,
+            actions
+        });
     };
 
     const defaultDeps = [
@@ -65,7 +66,8 @@ describe('MessageDialog', () => {
         injectable(ModalTitleText, createMockComponent('ModalTitleText')),
         injectable(Paragraph, createMockComponent('Paragraph')),
         injectable(Portal, createMockComponent('Portal')),
-        injectable(useMessageDialog, useMessageDialogMock),
+        injectable(useMessageDialogState, useMessageDialogStateMock),
+        injectable(useMessageDialogActions, () => ({ close: closeMessageDialogMock })),
         injectable(useTheme, useThemeMock)
     ];
 
@@ -78,11 +80,11 @@ describe('MessageDialog', () => {
                 error: 'mockErrorColor'
             }
         });
-        mockUseMessageDialog({});
+        mockUseMessageDialogState({});
     });
 
     it('should render dialog closed', () => {
-        mockUseMessageDialog({ isOpen: false });
+        mockUseMessageDialogState({ isOpen: false });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -94,7 +96,7 @@ describe('MessageDialog', () => {
     });
 
     it('should render dialog open', () => {
-        mockUseMessageDialog({ isOpen: true });
+        mockUseMessageDialogState({ isOpen: true });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -106,7 +108,7 @@ describe('MessageDialog', () => {
     });
 
     it('should pass close to dialog dismiss', () => {
-        mockUseMessageDialog({});
+        mockUseMessageDialogState({});
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -118,7 +120,7 @@ describe('MessageDialog', () => {
     });
 
     it('should render modal title', () => {
-        mockUseMessageDialog({ title: 'mock title' });
+        mockUseMessageDialogState({ title: 'mock title' });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -130,7 +132,7 @@ describe('MessageDialog', () => {
     });
 
     it('should not render modal title', () => {
-        mockUseMessageDialog({ title: '' });
+        mockUseMessageDialogState({ title: '' });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -142,7 +144,7 @@ describe('MessageDialog', () => {
     });
 
     it('should render without icon', () => {
-        mockUseMessageDialog({ title: 'mock title', type: MESSAGE_DIALOG_TYPE.none });
+        mockUseMessageDialogState({ title: 'mock title', type: MESSAGE_DIALOG_TYPE.none });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -154,7 +156,7 @@ describe('MessageDialog', () => {
     });
 
     it('should render info icon', () => {
-        mockUseMessageDialog({ title: 'mock title', type: MESSAGE_DIALOG_TYPE.info });
+        mockUseMessageDialogState({ title: 'mock title', type: MESSAGE_DIALOG_TYPE.info });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -170,7 +172,7 @@ describe('MessageDialog', () => {
     });
 
     it('should render warning icon', () => {
-        mockUseMessageDialog({ title: 'mock title', type: MESSAGE_DIALOG_TYPE.warning });
+        mockUseMessageDialogState({ title: 'mock title', type: MESSAGE_DIALOG_TYPE.warning });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -186,7 +188,7 @@ describe('MessageDialog', () => {
     });
 
     it('should render error icon', () => {
-        mockUseMessageDialog({ title: 'mock title', type: MESSAGE_DIALOG_TYPE.error });
+        mockUseMessageDialogState({ title: 'mock title', type: MESSAGE_DIALOG_TYPE.error });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -202,7 +204,7 @@ describe('MessageDialog', () => {
     });
 
     it('should render dialog actions', () => {
-        mockUseMessageDialog({});
+        mockUseMessageDialogState({});
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -228,7 +230,7 @@ describe('MessageDialog', () => {
     });
 
     it('should not render dialog actions when null', () => {
-        mockUseMessageDialog({ actions: null });
+        mockUseMessageDialogState({ actions: null });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -240,7 +242,7 @@ describe('MessageDialog', () => {
     });
 
     it('should not render dialog actions when empty', () => {
-        mockUseMessageDialog({ actions: [] });
+        mockUseMessageDialogState({ actions: [] });
 
         const wrapper = mountWithDi(
             <MessageDialog />,
@@ -252,7 +254,7 @@ describe('MessageDialog', () => {
     });
 
     it('should render modal message', () => {
-        mockUseMessageDialog({ message: 'mock message' });
+        mockUseMessageDialogState({ message: 'mock message' });
 
         const wrapper = mountWithDi(
             <MessageDialog />,

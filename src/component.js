@@ -11,7 +11,11 @@ import {
 } from 'react-native-paper';
 import { AntDesign } from '@expo/vector-icons';
 import { di } from 'react-magnetic-di';
-import { useMessageDialog, MESSAGE_DIALOG_TYPE } from './store';
+import {
+    useMessageDialogState,
+    useMessageDialogActions,
+    MESSAGE_DIALOG_TYPE
+} from './store';
 
 const getColor = ({ type, colors }) => ({
     [MESSAGE_DIALOG_TYPE.none]: colors.text,
@@ -100,18 +104,20 @@ export const MessageDialog = () => {
         ModalTitleText,
         Paragraph,
         Portal,
-        useMessageDialog,
+        useMessageDialogActions,
+        useMessageDialogState,
         useTheme
     );
 
-    const [{
+    const {
         isOpen,
         title,
         message,
         renderContent,
         type,
         actions
-    }, { close }] = useMessageDialog();
+    } = useMessageDialogState();
+    const { close } = useMessageDialogActions();
     const { colors } = useTheme();
     const Icon = iconsMap[type];
 

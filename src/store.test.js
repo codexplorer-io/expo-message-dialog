@@ -16,7 +16,8 @@ describe('store', () => {
             type: MESSAGE_DIALOG_TYPE.none,
             actions: [],
             onOpen: null,
-            onClose: null
+            onClose: null,
+            customConfig: null
         });
         expect(actions).toStrictEqual({
             open: expect.any(Function),
@@ -47,7 +48,8 @@ describe('store', () => {
                 actions: ['mock action 1', 'mock action 2'],
                 renderContent: 'mock function',
                 onOpen: null,
-                onClose: null
+                onClose: null,
+                customConfig: null
             });
         });
 
@@ -141,7 +143,8 @@ describe('store', () => {
                 title: 'mock title',
                 message: 'mock message',
                 actions: ['mock action 1', 'mock action 2'],
-                renderContent: 'mock function'
+                renderContent: 'mock function',
+                customConfig: null
             });
         });
 

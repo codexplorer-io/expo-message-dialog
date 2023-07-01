@@ -1,6 +1,7 @@
 import {
     createStore,
-    createHook
+    createActionsHook,
+    createStateHook
 } from 'react-sweet-state';
 import map from 'lodash/map';
 import noop from 'lodash/noop';
@@ -20,7 +21,8 @@ const initialState = {
     type: MESSAGE_DIALOG_TYPE.none,
     actions: [],
     onOpen: null,
-    onClose: null
+    onClose: null,
+    customConfig: null
 };
 
 export const Store = createStore({
@@ -33,7 +35,8 @@ export const Store = createStore({
             type = MESSAGE_DIALOG_TYPE.none,
             actions,
             onOpen = null,
-            onClose = null
+            onClose = null,
+            customConfig = null
         }) => ({ getState, setState }) => {
             const { isOpen } = getState();
             if (isOpen) {
@@ -48,7 +51,8 @@ export const Store = createStore({
                 type,
                 actions,
                 onOpen,
-                onClose
+                onClose,
+                customConfig
             });
             onOpen?.();
         },
@@ -56,9 +60,13 @@ export const Store = createStore({
             title = '',
             message,
             renderContent = null,
-            actions
+            actions,
+            customConfig = null
         }) => ({ getState, setState }) => {
-            const { isOpen } = getState();
+            const {
+                isOpen,
+                customConfig: previousCustomConfig
+            } = getState();
             if (!isOpen) {
                 return;
             }
@@ -67,7 +75,11 @@ export const Store = createStore({
                 title,
                 message,
                 renderContent,
-                actions
+                actions,
+                customConfig: (previousCustomConfig || customConfig) && {
+                    ...(previousCustomConfig ?? {}),
+                    ...(customConfig ?? {})
+                }
             });
         },
         close: () => ({ getState, setState }) => {
@@ -92,6 +104,12 @@ export const Store = createStore({
     name: 'MessageDialog'
 });
 
-export const useMessageDialog = createHook(Store);
+export const useMessageDialogState = createStateHook(Store);
 
-export const useMessageDialogActions = createHook(Store, { selector: null });
+export const useMessageDialogCustomConfig = createStateHook(
+    Store, {
+        selector: ({ customConfig }) => customConfig
+    }
+);
+
+export const useMessageDialogActions = createActionsHook(Store);

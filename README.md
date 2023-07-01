@@ -74,7 +74,7 @@ import {
 ...
 
 export const MyComponent = () => {
-    const [, { open, close }] = useMessageDialogActions();
+    const { open, close } = useMessageDialogActions();
     const showDialog = () => open({
         title: 'Message dialog title',
         message: 'Message dialog message.',
@@ -114,12 +114,13 @@ symbol|description|
 -|-|
 MessageDialog|message dialog component|
 useMessageDialogActions|hook used to control message dialog visibility|
+useMessageDialogCustomConfig|hook used to get message dialog custom config|
 MESSAGE_DIALOG_TYPE|constant used for rendering styled message dialog|
 
 ## useMessageDialogActions
-Returns an array with `open`, `updateState` and `close` actions on the second index:
+Returns an object with `open`, `updateState` and `close` actions:
 ```
-const [, { open, updateState, close }] = useMessageDialogActions();
+const { open, updateState, close } = useMessageDialogActions();
 
 ...
 open(...open action parameters);
@@ -139,3 +140,16 @@ type|optional message dialog type (default: MESSAGE_DIALOG_TYPE.none)|
 actions|optional message dialog actions, array with objects of shape `[{ id: 'unique string action id', handler: () => { /* invoked when button is clicked*/ }, text: 'Action button label', color: 'red', mode: 'contained', isDisabled: true }, ...]`|
 onOpen|optinal callback when dialog is open|
 onClose|optinal callback when dialog is closed|
+customConfig|optinal custom config properties to save for opened dialog instance|
+
+## useMessageDialogCustomConfig
+Returns an object saved as `customConfig` for currently open dialog instance:
+```
+const customConfig = useMessageDialogCustomConfig();
+
+...
+// Access to the property from customConfig
+if (customConfig?.myProperty) {
+    // Do something
+}
+```
