@@ -60,11 +60,13 @@ export const Store = createStore({
             title = '',
             message,
             renderContent = null,
+            type = null,
             actions,
             customConfig = null
         }) => ({ getState, setState }) => {
             const {
                 isOpen,
+                type: previousType,
                 customConfig: previousCustomConfig
             } = getState();
             if (!isOpen) {
@@ -75,6 +77,7 @@ export const Store = createStore({
                 title,
                 message,
                 renderContent,
+                type: type ?? previousType,
                 actions,
                 customConfig: (previousCustomConfig || customConfig) && {
                     ...(previousCustomConfig ?? {}),
