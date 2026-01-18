@@ -59,7 +59,7 @@ const iconsMap = {
 
         return (
             <AntDesign
-                name='infocirlceo'
+                name='info-circle'
                 size={24}
                 color={getColor({ type: MESSAGE_DIALOG_TYPE.info, colors })}
             />
@@ -81,7 +81,7 @@ const iconsMap = {
 
         return (
             <AntDesign
-                name='exclamationcircleo'
+                name='exclamation-circle'
                 size={24}
                 color={getColor({ type: MESSAGE_DIALOG_TYPE.error, colors })}
             />
