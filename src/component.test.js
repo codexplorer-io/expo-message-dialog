@@ -165,7 +165,7 @@ describe('MessageDialog', () => {
 
         // eslint-disable-next-line lodash/prefer-lodash-method
         expect(wrapper.find('AntDesign').props()).toEqual({
-            name: 'infocirlceo',
+            name: 'info-circle',
             size: 24,
             color: 'mockPrimaryColor'
         });
