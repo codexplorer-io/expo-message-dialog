@@ -1,155 +1,90 @@
-# expo-message-dialog
-Themeable message dialog for react-native & expo.
+# `@codexporer.io/expo-message-dialog`
 
-## Platform Compatibility
-iOS|Android|Web|
--|-|-|
-✅|✅|❌|
+An imperative, state-guarded message dialog overlay component and `react-sweet-state` hook for Expo and React Native applications.
 
-## Samples
+## Features
 
-### Message dialog
-<img title="Message dialog" src="https://github.com/codexplorer-io/expo-message-dialog/blob/main/samples/type-none.png?raw=true">
+- **Imperative Actions API**: Trigger, update, or dismiss message dialogs programmatically via `useMessageDialogActions()`.
+- **Themed UI**: Context provider (`MessageDialogProvider`) for theme configuration.
+- **Type Variant System**: Supports `none`, `info`, `warning`, and `error` types with icons.
+- **Zero Heavy UI Dependencies**: Built with native React Native components (`Modal`, `View`, `Text`, `TouchableOpacity`).
 
-### Info dialog
-<img title="Info message dialog" src="https://github.com/codexplorer-io/expo-message-dialog/blob/main/samples/type-info.png?raw=true">
+## Installation
 
-### Warning dialog
-<img title="Warning message dialog" src="https://github.com/codexplorer-io/expo-message-dialog/blob/main/samples/type-warning.png?raw=true">
-
-### Error dialog
-<img title="Error message dialog" src="https://github.com/codexplorer-io/expo-message-dialog/blob/main/samples/type-error.png?raw=true">
-
-## Prerequisites
-Module requires `styled-components` and some theme variable initalizations before it can be used, and to be rendered as an app parent.
-
-Required theme variables:
-
-- **colors.text** - Title text color used when generic message dialog is displayed
-- **colors.primary** - Title text color used when info message dialog is displayed
-- **colors.warning** - Title text color used when warning message dialog is displayed
-- **colors.error** - Title text color used when error message dialog is displayed
-
-```javascript
-import { ThemeProvider } from 'styled-components';
-import { App } from './app';
-
-const theme = {
-    colors: {
-        primary: primaryColor,
-        text: textColor,
-        warning: warningColor,
-        error: errorColor,
-        ...
-    },
-    ...
-};
-
-export const AppThemeWrapper = () => (
-    <ThemeProvider theme={theme}>
-        <App />
-    </ThemeProvider>
-);
+```bash
+yarn add @codexporer.io/expo-message-dialog
 ```
 
-## Usage
-Before dialog can be displayed, it needs to be rendered within `App` as a descendant of theme providers:
-```javascript
-import { MessageDialog } from '@codexporer.io/expo-message-dialog';
-...
-
-export const App = () => (
-    <>
-        <MessageDialog />
-        ...other app components
-    </>
-);
-```
-When `MessageDialog` component is rendered, it can be displayed from anywhere within the app:
-```javascript
-import {
-    useMessageDialogActions,
-    MESSAGE_DIALOG_TYPE
-} from '@codexporer.io/expo-message-dialog';
-...
-
-export const MyComponent = () => {
-    const { open, close } = useMessageDialogActions();
-    const showDialog = () => open({
-        title: 'Message dialog title',
-        message: 'Message dialog message.',
-        type: MESSAGE_DIALOG_TYPE.none, // or MESSAGE_DIALOG_TYPE.info | MESSAGE_DIALOG_TYPE.warning | MESSAGE_DIALOG_TYPE.error
-        actions: [ // optional action buttons
-            {
-                id: 'primaryAction',
-                handler: close,
-                text: 'Primary Action'
-            },
-            {
-                id: 'secondaryAction',
-                handler: ...,
-                text: 'Secondary Action'
-            }
-        ],
-        onOpen: () => {
-            // optinal callback when dialog is open
-        },
-        onClose: () => {
-            // optinal callback when dialog is closed
-        }
-    });
-    ...
-    
-    return (
-        <>
-            <Button onPress={showDialog}>Show Dialog</Button>
-            ...
-        </>
-    );
-};
-```
-
-## Exports
-symbol|description|
--|-|
-MessageDialog|message dialog component|
-useMessageDialogActions|hook used to control message dialog visibility|
-useMessageDialogCustomConfig|hook used to get message dialog custom config|
-MESSAGE_DIALOG_TYPE|constant used for rendering styled message dialog|
-
-## useMessageDialogActions
-Returns an object with `open`, `updateState` and `close` actions:
-```
-const { open, updateState, close } = useMessageDialogActions();
-
-...
-open(...open action parameters);
-...
-updateState(...updated state);
-...
-close();
-```
-
-### Open action parameters
-parameter|description|
--|-|
-title|optional message dialog title (default: empty string)|
-message|message dialog message|
-renderContent|custom render content function to replace the message (default: null)|
-type|optional message dialog type (default: MESSAGE_DIALOG_TYPE.none)|
-actions|optional message dialog actions, array with objects of shape `[{ id: 'unique string action id', handler: () => { /* invoked when button is clicked*/ }, text: 'Action button label', color: 'red', mode: 'contained', isDisabled: true }, ...]`|
-onOpen|optinal callback when dialog is open|
-onClose|optinal callback when dialog is closed|
-customConfig|optinal custom config properties to save for opened dialog instance|
-
-## useMessageDialogCustomConfig
-Returns an object saved as `customConfig` for currently open dialog instance:
-```
-const customConfig = useMessageDialogCustomConfig();
-
-...
-// Access to the property from customConfig
-if (customConfig?.myProperty) {
-    // Do something
+Ensure peer dependencies are installed:
+```json
+{
+  "peerDependencies": {
+    "react": "*",
+    "react-sweet-state": "*",
+    "lodash": "*",
+    "@expo/vector-icons": "*"
+  }
 }
 ```
+
+## Quick Start
+
+### 1. Wrap Root with `MessageDialogProvider`
+
+```tsx
+import React, { useMemo } from 'react';
+import { MessageDialogProvider, MessageDialogTheme } from '@codexporer.io/expo-message-dialog';
+
+export function RootLayout({ children }) {
+  const theme = useMemo<MessageDialogTheme>(() => ({
+    colors: {
+      dialogBackground: '#ffffff',
+      titleText: '#18181b',
+      messageText: '#71717a',
+      overlayBackground: 'rgba(0, 0, 0, 0.5)',
+      info: '#3b82f6',
+      warning: '#f59e0b',
+      error: '#ef4444',
+      buttonText: '#6366f1',
+      buttonBackground: '#f4f4f5',
+      buttonBorder: '#e4e4e7'
+    }
+  }), []);
+
+  return (
+    <MessageDialogProvider theme={theme}>
+      {children}
+    </MessageDialogProvider>
+  );
+}
+```
+
+### 2. Trigger Dialogs Imperatively
+
+```tsx
+import React from 'react';
+import { Button } from 'react-native';
+import { useMessageDialogActions, MESSAGE_DIALOG_TYPE } from '@codexporer.io/expo-message-dialog';
+
+export function DemoScreen() {
+  const [, { open, close }] = useMessageDialogActions();
+
+  const handleShowAlert = () => {
+    open({
+      title: 'Delete Confirmation',
+      message: 'Are you sure you want to delete this record?',
+      type: MESSAGE_DIALOG_TYPE.warning,
+      actions: [
+        { id: 'cancel', text: 'Cancel', handler: close },
+        { id: 'delete', text: 'Delete', handler: () => { performDelete(); close(); } }
+      ]
+    });
+  };
+
+  return <Button title="Show Alert" onPress={handleShowAlert} />;
+}
+```
+
+## License
+
+MIT
