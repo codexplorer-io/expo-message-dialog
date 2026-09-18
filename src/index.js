@@ -1,10 +1,10 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
-    Modal,
     View,
     Text,
     TouchableOpacity,
-    StyleSheet
+    StyleSheet,
+    Animated
 } from 'react-native';
 import { createStore, createHook } from 'react-sweet-state';
 import { AntDesign } from '@expo/vector-icons';
@@ -180,22 +180,44 @@ const iconsMap = {
 
 export const MessageDialog = () => {
     const [{ isOpen, title, message, renderContent, type, actions }] = useMessageDialogState();
-    const { close } = useMessageDialogActions();
     const theme = useMessageDialogTheme();
     const { colors } = theme;
     const Icon = iconsMap[type] || iconsMap[MESSAGE_DIALOG_TYPE.none];
 
-    if (!isOpen) {
+    const [mounted, setMounted] = useState(isOpen);
+    const opacity = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (isOpen) {
+            setMounted(true);
+            Animated.timing(opacity, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: true
+            }).start();
+        } else {
+            Animated.timing(opacity, {
+                toValue: 0,
+                duration: 150,
+                useNativeDriver: true
+            }).start(() => {
+                setMounted(false);
+            });
+        }
+    }, [isOpen, opacity]);
+
+    if (!mounted) {
         return null;
     }
 
     return (
-        <Modal
-            visible={isOpen}
-            transparent
-            animationType="fade"
-            statusBarTranslucent
-            onRequestClose={close}
+        <Animated.View
+            style={[
+                StyleSheet.absoluteFill,
+                styles.overlayContainer,
+                { opacity }
+            ]}
+            pointerEvents={isOpen ? 'auto' : 'none'}
         >
             <View style={[styles.overlay, { backgroundColor: colors.overlayBackground }]}>
                 <View style={[styles.dialogContainer, { backgroundColor: colors.dialogBackground, shadowColor: colors.shadowColor }]}>
@@ -259,11 +281,15 @@ export const MessageDialog = () => {
                     )}
                 </View>
             </View>
-        </Modal>
+        </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
+    overlayContainer: {
+        zIndex: 99999,
+        elevation: 99999,
+    },
     overlay: {
         flex: 1,
         justifyContent: 'center',
