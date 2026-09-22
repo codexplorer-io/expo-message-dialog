@@ -4,7 +4,8 @@ import {
     Text,
     TouchableOpacity,
     StyleSheet,
-    Animated
+    Animated,
+    BackHandler
 } from 'react-native';
 import { createStore, createHook } from 'react-sweet-state';
 import { AntDesign } from '@expo/vector-icons';
@@ -180,6 +181,7 @@ const iconsMap = {
 
 export const MessageDialog = () => {
     const [{ isOpen, title, message, renderContent, type, actions }] = useMessageDialogState();
+    const [, { close }] = useMessageDialogActions();
     const theme = useMessageDialogTheme();
     const { colors } = theme;
     const Icon = iconsMap[type] || iconsMap[MESSAGE_DIALOG_TYPE.none];
@@ -205,6 +207,21 @@ export const MessageDialog = () => {
             });
         }
     }, [isOpen, opacity]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+            close();
+            return true;
+        });
+
+        return () => {
+            subscription?.remove();
+        };
+    }, [isOpen, close]);
 
     if (!mounted) {
         return null;
