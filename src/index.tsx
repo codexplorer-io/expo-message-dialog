@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
-    TouchableOpacity,
     StyleSheet,
     Animated,
     BackHandler
@@ -16,21 +15,66 @@ import {
     actions as linkActions,
     selector as linkSelector
 } from '@codexporer.io/expo-link-stores';
+import { useAppTheme, AppThemeColors } from '@codexporer.io/expo-app-theme';
+import { Button, ButtonVariant, ButtonSize } from '@codexporer.io/expo-button';
 
-export const MESSAGE_DIALOG_TYPE = {
-    none: 'none',
-    info: 'info',
-    warning: 'warning',
-    error: 'error'
-};
+export enum MessageDialogType {
+    None = 'none',
+    Info = 'info',
+    Warning = 'warning',
+    Error = 'error',
+}
 
-const initialState = {
+export interface MessageDialogActionOption {
+    id?: string | number;
+    text: string;
+    handler?: () => void;
+    color?: string;
+    variant?: ButtonVariant;
+    size?: ButtonSize;
+    isDisabled?: boolean;
+}
+
+export interface OpenMessageDialogOptions {
+    title?: string;
+    message?: string;
+    renderContent?: (() => React.ReactNode) | null;
+    type?: MessageDialogType;
+    actions?: MessageDialogActionOption[];
+    onOpen?: (() => void) | null;
+    onClose?: (() => void) | null;
+    customConfig?: Record<string, unknown> | null;
+}
+
+export interface UpdateMessageDialogOptions {
+    title?: string;
+    message?: string;
+    renderContent?: (() => React.ReactNode) | null;
+    type?: MessageDialogType | null;
+    actions?: MessageDialogActionOption[];
+    customConfig?: Record<string, unknown> | null;
+}
+
+export interface MessageDialogState {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    renderContent: (() => React.ReactNode) | null;
+    type: MessageDialogType;
+    actions: MessageDialogActionOption[];
+    onOpen: (() => void) | null;
+    onClose: (() => void) | null;
+    customConfig: Record<string, unknown> | null;
+    [key: string]: unknown;
+}
+
+const initialState: MessageDialogState = {
     ...linkInitialState,
     isOpen: false,
     title: '',
     message: '',
     renderContent: null,
-    type: MESSAGE_DIALOG_TYPE.none,
+    type: MessageDialogType.None,
     actions: [],
     onOpen: null,
     onClose: null,
@@ -45,12 +89,12 @@ export const Store = createStore({
             title = '',
             message = '',
             renderContent = null,
-            type = MESSAGE_DIALOG_TYPE.none,
+            type = MessageDialogType.None,
             actions = [],
             onOpen = null,
             onClose = null,
             customConfig = null
-        } = {}) => ({ getState, setState }) => {
+        }: OpenMessageDialogOptions = {}) => ({ getState, setState }: { getState: () => MessageDialogState; setState: (state: Partial<MessageDialogState>) => void }) => {
             const { isOpen } = getState();
             if (isOpen) {
                 return;
@@ -76,7 +120,7 @@ export const Store = createStore({
             type = null,
             actions = [],
             customConfig = null
-        } = {}) => ({ getState, setState }) => {
+        }: UpdateMessageDialogOptions = {}) => ({ getState, setState }: { getState: () => MessageDialogState; setState: (state: Partial<MessageDialogState>) => void }) => {
             const {
                 isOpen,
                 type: previousType,
@@ -92,19 +136,19 @@ export const Store = createStore({
                 renderContent,
                 type: type ?? previousType,
                 actions,
-                customConfig: (previousCustomConfig || customConfig) && {
+                customConfig: (previousCustomConfig || customConfig) ? {
                     ...(previousCustomConfig ?? {}),
                     ...(customConfig ?? {})
-                }
+                } : null
             });
         },
-        close: () => ({ getState, setState }) => {
+        close: () => ({ getState, setState }: { getState: () => MessageDialogState; setState: (state: Partial<MessageDialogState>) => void }) => {
             const { isOpen, onClose, actions: oldActions } = getState();
             if (!isOpen) {
                 return;
             }
 
-            const actions = map(oldActions, action => ({
+            const actions = map(oldActions, (action: MessageDialogActionOption) => ({
                 ...action,
                 handler: noop
             }));
@@ -128,63 +172,50 @@ export const useMessageDialogCustomConfig = createHook(Store, {
 
 export const useMessageDialogActions = createHook(Store, { selector: null });
 
-const MessageDialogContext = createContext(null);
-
-export const MessageDialogProvider = ({ children, theme }) => {
-    return (
-        <MessageDialogContext.Provider value={theme}>
-            {children}
-            <MessageDialog />
-        </MessageDialogContext.Provider>
-    );
-};
-
-const useMessageDialogTheme = () => {
-    const context = useContext(MessageDialogContext);
-    if (!context) {
-        throw new Error('useMessageDialogTheme must be used within a MessageDialogProvider with a mandatory theme prop.');
+const getTypeColor = (type: MessageDialogType, theme: AppThemeColors): string => {
+    switch (type) {
+        case MessageDialogType.Info:
+            return theme.info || theme.primary;
+        case MessageDialogType.Warning:
+            return theme.warning;
+        case MessageDialogType.Error:
+            return theme.error;
+        case MessageDialogType.None:
+        default:
+            return theme.text;
     }
-    return context;
 };
 
-const getColor = ({ type, colors }) => ({
-    [MESSAGE_DIALOG_TYPE.none]: colors.titleText || colors.messageText,
-    [MESSAGE_DIALOG_TYPE.info]: colors.info,
-    [MESSAGE_DIALOG_TYPE.warning]: colors.warning,
-    [MESSAGE_DIALOG_TYPE.error]: colors.error
-})[type];
-
-const iconsMap = {
-    [MESSAGE_DIALOG_TYPE.none]: () => null,
-    [MESSAGE_DIALOG_TYPE.info]: ({ colors }) => (
+const iconsMap: Record<MessageDialogType, React.FC<{ theme: AppThemeColors }>> = {
+    [MessageDialogType.None]: () => null,
+    [MessageDialogType.Info]: ({ theme }) => (
         <AntDesign
             name="info-circle"
             size={24}
-            color={getColor({ type: MESSAGE_DIALOG_TYPE.info, colors })}
+            color={getTypeColor(MessageDialogType.Info, theme)}
         />
     ),
-    [MESSAGE_DIALOG_TYPE.warning]: ({ colors }) => (
+    [MessageDialogType.Warning]: ({ theme }) => (
         <AntDesign
             name="warning"
             size={24}
-            color={getColor({ type: MESSAGE_DIALOG_TYPE.warning, colors })}
+            color={getTypeColor(MessageDialogType.Warning, theme)}
         />
     ),
-    [MESSAGE_DIALOG_TYPE.error]: ({ colors }) => (
+    [MessageDialogType.Error]: ({ theme }) => (
         <AntDesign
             name="exclamation-circle"
             size={24}
-            color={getColor({ type: MESSAGE_DIALOG_TYPE.error, colors })}
+            color={getTypeColor(MessageDialogType.Error, theme)}
         />
     )
 };
 
-export const MessageDialog = () => {
+export const MessageDialog: React.FC = () => {
     const [{ isOpen, title, message, renderContent, type, actions }] = useMessageDialogState();
     const [, { close }] = useMessageDialogActions();
-    const theme = useMessageDialogTheme();
-    const { colors } = theme;
-    const Icon = iconsMap[type] || iconsMap[MESSAGE_DIALOG_TYPE.none];
+    const theme = useAppTheme();
+    const Icon = iconsMap[type] || iconsMap[MessageDialogType.None];
 
     const [mounted, setMounted] = useState(isOpen);
     const opacity = useRef(new Animated.Value(0)).current;
@@ -236,17 +267,17 @@ export const MessageDialog = () => {
             ]}
             pointerEvents={isOpen ? 'auto' : 'none'}
         >
-            <View style={[styles.overlay, { backgroundColor: colors.overlayBackground }]}>
-                <View style={[styles.dialogContainer, { backgroundColor: colors.dialogBackground, shadowColor: colors.shadowColor }]}>
+            <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
+                <View style={[styles.dialogContainer, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
                     {!!title && (
                         <View style={styles.titleRow}>
-                            <Icon colors={colors} />
+                            <Icon theme={theme} />
                             <Text
                                 style={[
                                     styles.titleText,
                                     {
-                                        color: getColor({ type, colors }) || colors.titleText || colors.messageText,
-                                        marginLeft: type !== MESSAGE_DIALOG_TYPE.none ? 10 : 0
+                                        color: getTypeColor(type, theme),
+                                        marginLeft: type !== MessageDialogType.None ? 10 : 0
                                     }
                                 ]}
                             >
@@ -258,40 +289,31 @@ export const MessageDialog = () => {
                         {renderContent ? (
                             renderContent()
                         ) : (
-                            <Text style={[styles.messageText, { color: colors.messageText }]}>
+                            <Text style={[styles.messageText, { color: theme.text }]}>
                                 {message}
                             </Text>
                         )}
                     </View>
                     {actions?.length > 0 && (
-                        <View style={styles.buttonsContainer}>
+                        <View style={styles.actionsContainer}>
                             {map(
                                 actions,
                                 ({
                                     id,
                                     handler,
                                     text,
-                                    color,
+                                    variant,
+                                    size,
                                     isDisabled
-                                }, index) => (
-                                    <TouchableOpacity
+                                }: MessageDialogActionOption, index: number) => (
+                                    <Button
                                         key={id || index}
+                                        title={text}
                                         onPress={handler}
+                                        variant={variant || ButtonVariant.Secondary}
+                                        size={size || ButtonSize.Small}
                                         disabled={isDisabled}
-                                        style={[
-                                            styles.button,
-                                            {
-                                                backgroundColor: color || colors.buttonBackground,
-                                                borderColor: colors.buttonBorder || 'transparent',
-                                                opacity: isDisabled ? 0.5 : 1
-                                            },
-                                            index > 0 && styles.buttonMarginLeft
-                                        ]}
-                                    >
-                                        <Text style={[styles.buttonText, { color: colors.buttonText }]}>
-                                            {text}
-                                        </Text>
-                                    </TouchableOpacity>
+                                    />
                                 )
                             )}
                         </View>
@@ -341,24 +363,13 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 22
     },
-    buttonsContainer: {
+    actionsContainer: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
-        flexWrap: 'wrap'
-    },
-    button: {
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        borderWidth: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    buttonMarginLeft: {
-        marginLeft: 8
-    },
-    buttonText: {
-        fontSize: 15,
-        fontWeight: '600'
+        flexWrap: 'wrap',
+        gap: 8,
+        marginTop: 16,
     }
 });
+
+export default MessageDialog;
