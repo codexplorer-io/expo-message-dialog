@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import {
     View,
     Text,
-    StyleSheet,
-    Animated,
-    BackHandler
+    StyleSheet
 } from 'react-native';
 import { createStore, createHook } from 'react-sweet-state';
 import { AntDesign } from '@expo/vector-icons';
@@ -16,6 +14,7 @@ import {
     selector as linkSelector
 } from '@codexporer.io/expo-link-stores';
 import { useAppTheme, AppThemeColors } from '@codexporer.io/expo-app-theme';
+import { Dialog } from '@codexporer.io/expo-dialog';
 import { Button, ButtonVariant, ButtonSize } from '@codexporer.io/expo-button';
 
 export enum MessageDialogType {
@@ -217,134 +216,67 @@ export const MessageDialog: React.FC = () => {
     const theme = useAppTheme();
     const Icon = iconsMap[type] || iconsMap[MessageDialogType.None];
 
-    const [mounted, setMounted] = useState(isOpen);
-    const opacity = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        if (isOpen) {
-            setMounted(true);
-            Animated.timing(opacity, {
-                toValue: 1,
-                duration: 200,
-                useNativeDriver: true
-            }).start();
-        } else {
-            Animated.timing(opacity, {
-                toValue: 0,
-                duration: 150,
-                useNativeDriver: true
-            }).start(() => {
-                setMounted(false);
-            });
-        }
-    }, [isOpen, opacity]);
-
-    useEffect(() => {
-        if (!isOpen) {
-            return;
-        }
-
-        const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-            close();
-            return true;
-        });
-
-        return () => {
-            subscription?.remove();
-        };
-    }, [isOpen, close]);
-
-    if (!mounted) {
-        return null;
-    }
-
     return (
-        <Animated.View
-            style={[
-                StyleSheet.absoluteFill,
-                styles.overlayContainer,
-                { opacity }
-            ]}
-            pointerEvents={isOpen ? 'auto' : 'none'}
+        <Dialog
+            visible={isOpen}
+            onDismiss={close}
+            dismissOnBackdropPress={false}
+            dismissOnHardwareBackPress={true}
         >
-            <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
-                <View style={[styles.dialogContainer, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
-                    {!!title && (
-                        <View style={styles.titleRow}>
-                            <Icon theme={theme} />
-                            <Text
-                                style={[
-                                    styles.titleText,
-                                    {
-                                        color: getTypeColor(type, theme),
-                                        marginLeft: type !== MessageDialogType.None ? 10 : 0
-                                    }
-                                ]}
-                            >
-                                {title}
-                            </Text>
-                        </View>
-                    )}
-                    <View style={styles.content}>
-                        {renderContent ? (
-                            renderContent()
-                        ) : (
-                            <Text style={[styles.messageText, { color: theme.text }]}>
-                                {message}
-                            </Text>
-                        )}
-                    </View>
-                    {actions?.length > 0 && (
-                        <View style={styles.actionsContainer}>
-                            {map(
-                                actions,
-                                ({
-                                    id,
-                                    handler,
-                                    text,
-                                    variant,
-                                    size,
-                                    isDisabled
-                                }: MessageDialogActionOption, index: number) => (
-                                    <Button
-                                        key={id || index}
-                                        title={text}
-                                        onPress={handler}
-                                        variant={variant || ButtonVariant.Secondary}
-                                        size={size || ButtonSize.Small}
-                                        disabled={isDisabled}
-                                    />
-                                )
-                            )}
-                        </View>
+            {!!title && (
+                <View style={styles.titleRow}>
+                    <Icon theme={theme} />
+                    <Text
+                        style={[
+                            styles.titleText,
+                            {
+                                color: getTypeColor(type, theme),
+                                marginLeft: type !== MessageDialogType.None ? 10 : 0
+                            }
+                        ]}
+                    >
+                        {title}
+                    </Text>
+                </View>
+            )}
+            <View style={styles.content}>
+                {renderContent ? (
+                    renderContent()
+                ) : (
+                    <Text style={[styles.messageText, { color: theme.text }]}>
+                        {message}
+                    </Text>
+                )}
+            </View>
+            {actions?.length > 0 && (
+                <View style={styles.actionsContainer}>
+                    {map(
+                        actions,
+                        ({
+                            id,
+                            handler,
+                            text,
+                            variant,
+                            size,
+                            isDisabled
+                        }: MessageDialogActionOption, index: number) => (
+                            <Button
+                                key={id || index}
+                                title={text}
+                                onPress={handler}
+                                variant={variant || ButtonVariant.Secondary}
+                                size={size || ButtonSize.Small}
+                                disabled={isDisabled}
+                            />
+                        )
                     )}
                 </View>
-            </View>
-        </Animated.View>
+            )}
+        </Dialog>
     );
 };
 
 const styles = StyleSheet.create({
-    overlayContainer: {
-        zIndex: 99999,
-        elevation: 99999,
-    },
-    overlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 24
-    },
-    dialogContainer: {
-        width: '100%',
-        maxWidth: 400,
-        borderRadius: 16,
-        padding: 24,
-        elevation: 5,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4
-    },
     titleRow: {
         flexDirection: 'row',
         alignItems: 'center',

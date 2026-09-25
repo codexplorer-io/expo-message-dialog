@@ -8,6 +8,7 @@
     "react-sweet-state": "*",
     "lodash": "*",
     "@expo/vector-icons": "*",
+    "@codexporer.io/expo-dialog": "*",
     "@codexporer.io/expo-link-stores": "*",
     "@codexporer.io/expo-app-theme": "*",
     "@codexporer.io/expo-button": "*"
