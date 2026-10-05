@@ -32,27 +32,6 @@ export default function RootLayout() {
 }
 ```
 
-### 2. (Optional) Cross-Package Store Linking
-To allow decoupled packages (e.g. `@codexporer.io/expo-image-picker`) to trigger message dialogs without direct dependencies, link the store at app initialization:
-
-```tsx
-import { useEffect } from 'react';
-import { linkStores } from '@codexporer.io/expo-link-stores';
-import { useMessageDialogActions } from '@codexporer.io/expo-message-dialog';
-
-export function RootStoreLinker() {
-  const [, messageDialogActions] = useMessageDialogActions();
-
-  useEffect(() => {
-    if (messageDialogActions) {
-      linkStores({ messageDialog: messageDialogActions });
-    }
-  }, [messageDialogActions]);
-
-  return null;
-}
-```
-
 ---
 
 ## Hook Usage Pattern
@@ -69,7 +48,7 @@ import {
 import { Button, ButtonVariant, ButtonSize } from '@codexporer.io/expo-button';
 
 export function DemoScreen() {
-  const [, { open, close }] = useMessageDialogActions();
+  const { open, close } = useMessageDialogActions();
 
   const handleShowAlert = () => {
     open({
@@ -147,7 +126,7 @@ Buttons are powered by `@codexporer.io/expo-button`:
 1. **Mounting**: Always mount `<MessageDialog />` inside `ThemeProvider`. Never look for or create a `MessageDialogProvider`.
 2. **Destructured Actions Pattern**: ALWAYS destructure:
    ```tsx
-   const [, { open, close }] = useMessageDialogActions();
+   const { open, close } = useMessageDialogActions();
    ```
 3. **Use `MessageDialogType` Enum**: Never pass raw strings like `'info'` or `'error'` for dialog type; always use `MessageDialogType.Info`, `MessageDialogType.Warning`, `MessageDialogType.Error`, or `MessageDialogType.None`.
 4. **Use `ButtonVariant` & `ButtonSize`**: When specifying button variants and sizes in dialog `actions`, import and use `ButtonVariant` and `ButtonSize` from `@codexporer.io/expo-button`.

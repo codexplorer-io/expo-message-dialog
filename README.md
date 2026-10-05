@@ -18,7 +18,7 @@ yarn add @codexporer.io/expo-message-dialog
 
 Ensure peer dependencies are installed:
 ```bash
-yarn add react-sweet-state lodash @expo/vector-icons @codexporer.io/expo-dialog @codexporer.io/expo-link-stores @codexporer.io/expo-app-theme @codexporer.io/expo-button
+yarn add react-sweet-state lodash @expo/vector-icons @codexporer.io/expo-dialog @codexporer.io/expo-app-theme @codexporer.io/expo-button
 ```
 
 ## Quick Start
@@ -52,7 +52,7 @@ import {
 import { ButtonVariant } from '@codexporer.io/expo-button';
 
 export function DemoScreen() {
-  const [, { open, close }] = useMessageDialogActions();
+  const { open, close } = useMessageDialogActions();
 
   const handleShowWarning = () => {
     open({

@@ -5,12 +5,13 @@ Imperative and hook-driven message dialog overlay powered by `react-sweet-state`
 
 ## Core Exports
 - `<MessageDialog />`: Main dialog overlay component. Render once in app root.
-- `useMessageDialogActions()`: Returns `[null, { open, updateState, close }]`.
-- `useMessageDialogCustomConfig()`: Returns `[customConfig, actions]`.
+- `useMessageDialogActions()`: Returns `{ open, updateState, close }`.
+- `useMessageDialogState()`: Returns `MessageDialogState` object (`{ isOpen, title, message, renderContent, type, actions }`).
+- `useMessageDialogCustomConfig()`: Returns `customConfig`.
 - `MessageDialogType`: Enum (`None`, `Info`, `Warning`, `Error`).
 
 ## Critical Guidelines for AI Agents
-- Destructure actions: `const [, { open: openMessageDialog, close: closeMessageDialog }] = useMessageDialogActions();`
+- Destructure actions: `const { open: openMessageDialog, close: closeMessageDialog } = useMessageDialogActions();`
 - Do NOT use optional chaining (`?.`) on `openMessageDialog` or `closeMessageDialog`.
 - In `useEffect` hooks, always supply clean-up: `return () => closeMessageDialog();`.
 - Use `MessageDialogType` enum (e.g. `MessageDialogType.Warning`, `MessageDialogType.Error`) when opening dialogs.

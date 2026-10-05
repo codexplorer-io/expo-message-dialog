@@ -4,15 +4,10 @@ import {
     Text,
     StyleSheet
 } from 'react-native';
-import { createStore, createHook } from 'react-sweet-state';
+import { createStore, createStateHook, createActionsHook } from 'react-sweet-state';
 import { AntDesign } from '@expo/vector-icons';
 import map from 'lodash/map';
 import noop from 'lodash/noop';
-import {
-    initialState as linkInitialState,
-    actions as linkActions,
-    selector as linkSelector
-} from '@codexporer.io/expo-link-stores';
 import { useAppTheme, AppThemeColors } from '@codexporer.io/expo-app-theme';
 import { Dialog } from '@codexporer.io/expo-dialog';
 import { Button, ButtonVariant, ButtonSize } from '@codexporer.io/expo-button';
@@ -64,11 +59,9 @@ export interface MessageDialogState {
     onOpen: (() => void) | null;
     onClose: (() => void) | null;
     customConfig: Record<string, unknown> | null;
-    [key: string]: unknown;
 }
 
 const initialState: MessageDialogState = {
-    ...linkInitialState,
     isOpen: false,
     title: '',
     message: '',
@@ -83,7 +76,6 @@ const initialState: MessageDialogState = {
 export const Store = createStore({
     initialState,
     actions: {
-        ...linkActions,
         open: ({
             title = '',
             message = '',
@@ -163,13 +155,13 @@ export const Store = createStore({
     name: 'MessageDialogActions'
 });
 
-const useMessageDialogState = createHook(Store, { selector: state => linkSelector(state) });
+export const useMessageDialogState = createStateHook(Store);
 
-export const useMessageDialogCustomConfig = createHook(Store, {
+export const useMessageDialogCustomConfig = createStateHook(Store, {
     selector: state => state.customConfig
 });
 
-export const useMessageDialogActions = createHook(Store, { selector: null });
+export const useMessageDialogActions = createActionsHook(Store);
 
 const getTypeColor = (type: MessageDialogType, theme: AppThemeColors): string => {
     switch (type) {
@@ -211,8 +203,8 @@ const iconsMap: Record<MessageDialogType, React.FC<{ theme: AppThemeColors }>> =
 };
 
 export const MessageDialog: React.FC = () => {
-    const [{ isOpen, title, message, renderContent, type, actions }] = useMessageDialogState();
-    const [, { close }] = useMessageDialogActions();
+    const { isOpen, title, message, renderContent, type, actions } = useMessageDialogState();
+    const { close } = useMessageDialogActions();
     const theme = useAppTheme();
     const Icon = iconsMap[type] || iconsMap[MessageDialogType.None];
 
