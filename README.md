@@ -116,6 +116,10 @@ export function DemoScreen() {
 | `size` | `ButtonSize` | Button size preset (`Small`, `Medium`, `Large`) |
 | `isDisabled` | `boolean` | Whether action button is disabled |
 
+### State Hooks
+- **`useMessageDialogState()`**: React Sweet State hook subscribing to the current dialog state (`{ isOpen, title, message, type, actions, customConfig }`).
+- **`useMessageDialogCustomConfig()`**: Selector hook returning the active `customConfig` payload.
+
 ## License
 
 MIT

@@ -10,6 +10,13 @@ description: Instructions for state-guarded modal message dialog implementation 
 
 ---
 
+## When to Use
+- Displaying modal confirmation prompts (e.g., delete confirmation, discard changes, exit without saving).
+- Presenting user feedback alerts (info, warning, or error messages) with custom button actions.
+- Showing imperative dialogs with custom render content without declaring inline modal state on every screen.
+
+---
+
 ## Required Setup
 
 ### 1. Mount `<MessageDialog />` in the Root Tree
@@ -119,9 +126,13 @@ Buttons are powered by `@codexporer.io/expo-button`:
 | `isDisabled` | `boolean` | Whether action button is disabled |
 | `id` | `string \| number` | Optional unique identifier |
 
+### State Inspection Hooks
+- `useMessageDialogState()`: Subscribes to the complete dialog state (`{ isOpen, title, message, type, actions, customConfig }`).
+- `useMessageDialogCustomConfig()`: Selector hook returning only the custom config payload object.
+
 ---
 
-## Mandatory Rules & Guidelines
+## Critical Rules & Guidelines
 
 1. **Mounting**: Always mount `<MessageDialog />` inside `ThemeProvider`. Never look for or create a `MessageDialogProvider`.
 2. **Destructured Actions Pattern**: ALWAYS destructure:

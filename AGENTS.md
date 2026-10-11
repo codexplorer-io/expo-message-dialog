@@ -3,7 +3,7 @@
 ## Package Overview
 Imperative and hook-driven message dialog overlay powered by `react-sweet-state` and `@codexporer.io/expo-app-theme`.
 
-## Core Exports
+## Key Exports
 - `<MessageDialog />`: Main dialog overlay component. Render once in app root.
 - `useMessageDialogActions()`: Returns `{ open, updateState, close }`.
 - `useMessageDialogState()`: Returns `MessageDialogState` object (`{ isOpen, title, message, renderContent, type, actions }`).
