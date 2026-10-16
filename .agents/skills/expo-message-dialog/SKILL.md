@@ -10,6 +10,26 @@ description: Instructions for state-guarded modal message dialog implementation 
 
 ---
 
+## Peer Dependencies
+
+All 8 peer dependencies are required and must be installed in consuming projects (none are optional):
+- `react`: `*`
+- `react-native`: `*`
+- `react-sweet-state`: `*`
+- `lodash`: `*`
+- `@expo/vector-icons`: `*`
+- `@codexporer.io/expo-dialog`: `*`
+- `@codexporer.io/expo-app-theme`: `*`
+- `@codexporer.io/expo-button`: `*`
+
+---
+
+## Theme Requirement
+
+`<MessageDialog />` calls `useAppTheme()` from `@codexporer.io/expo-app-theme` to retrieve theme colors for title headers, body text, and type icons (AntDesign icons: `info-circle`, `warning`, `exclamation-circle`). Consuming applications **must** mount `<ThemeProvider>` above `<MessageDialog />`.
+
+---
+
 ## When to Use
 - Displaying modal confirmation prompts (e.g., delete confirmation, discard changes, exit without saving).
 - Presenting user feedback alerts (info, warning, or error messages) with custom button actions.
@@ -20,19 +40,20 @@ description: Instructions for state-guarded modal message dialog implementation 
 ## Required Setup
 
 ### 1. Mount `<MessageDialog />` in the Root Tree
-Render `<MessageDialog />` near the top level of your component tree inside `ThemeProvider` (from `@codexporer.io/expo-app-theme` or the app's theme provider):
 
-> **NOTE:** Do **not** use `MessageDialogProvider` (it does not exist). Simply mount `<MessageDialog />` as a component inside `ThemeProvider`.
+Render `<MessageDialog />` near the top level of your component tree inside `<ThemeProvider>` from `@codexporer.io/expo-app-theme`:
+
+> **NOTE:** Do **not** use `MessageDialogProvider` (it does not exist). Simply mount `<MessageDialog />` as a component inside `<ThemeProvider>`.
 
 ```tsx
 import React from 'react';
-import { ThemeProvider } from '../providers/ThemeProvider';
+import { ThemeProvider, defaultThemeConfig } from '@codexporer.io/expo-app-theme';
 import { MessageDialog } from '@codexporer.io/expo-message-dialog';
 
-export default function RootLayout() {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider>
-      {/* App Navigators and Screens */}
+    <ThemeProvider themeConfig={defaultThemeConfig}>
+      {children}
       <MessageDialog />
     </ThemeProvider>
   );
@@ -96,39 +117,59 @@ export function DemoScreen() {
 
 ## API Reference
 
-### `MessageDialogType` (Enum)
-Always use the `MessageDialogType` enum for the dialog `type` option:
-- `MessageDialogType.None = 'none'`
-- `MessageDialogType.Info = 'info'`
-- `MessageDialogType.Warning = 'warning'`
-- `MessageDialogType.Error = 'error'`
+### `useMessageDialogActions()`
 
-### `open(options: OpenMessageDialogOptions)`
-| Option | Type | Description |
-| :--- | :--- | :--- |
-| `title` | `string` | Dialog title text |
-| `message` | `string` | Description or body message |
-| `type` | `MessageDialogType` | Dialog category (determines icon and header color accent) |
-| `actions` | `MessageDialogActionOption[]` | Action buttons rendered at the bottom |
-| `renderContent` | `() => ReactNode` | Optional custom render function replacing standard text `message` |
-| `onOpen` | `() => void` | Optional callback fired when dialog opens |
-| `onClose` | `() => void` | Optional callback fired when dialog closes |
-| `customConfig` | `Record<string, unknown>` | Optional custom payload stored in dialog state |
+Returns action methods:
+- `open(options: OpenMessageDialogOptions)`: Displays the dialog. State-guarded: ignores the call if a dialog is already open. Invokes `onOpen?.()`.
+- `updateState(options: UpdateMessageDialogOptions)`: Updates dialog `title`, `message`, `renderContent`, `type`, `actions`, and merges `customConfig`. State-guarded: ignores the call if the dialog is closed.
+- `close()`: Closes the dialog, transforms active action handlers to `lodash/noop`, clears open/close callbacks, and invokes `onClose?.()`. State-guarded: ignores the call if already closed.
+
+### `MessageDialogType` (Enum)
+- `MessageDialogType.None = 'none'` (renders default text color, no icon)
+- `MessageDialogType.Info = 'info'` (renders AntDesign `info-circle` with `theme.info || theme.primary`)
+- `MessageDialogType.Warning = 'warning'` (renders AntDesign `warning` with `theme.warning`)
+- `MessageDialogType.Error = 'error'` (renders AntDesign `exclamation-circle` with `theme.error`)
+
+### `OpenMessageDialogOptions`
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | `''` | Dialog header title |
+| `message` | `string` | `''` | Description or body message |
+| `type` | `MessageDialogType` | `MessageDialogType.None` | Category type (determines icon and header color accent) |
+| `actions` | `MessageDialogActionOption[]` | `[]` | Action buttons rendered at the bottom |
+| `renderContent` | `(() => React.ReactNode) \| null` | `null` | Optional custom render function replacing standard text `message` |
+| `onOpen` | `(() => void) \| null` | `null` | Optional callback fired when dialog opens |
+| `onClose` | `(() => void) \| null` | `null` | Optional callback fired when dialog closes |
+| `customConfig` | `Record<string, unknown> \| null` | `null` | Optional custom payload stored in dialog state |
+
+### `UpdateMessageDialogOptions`
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | `''` | Updated dialog header title |
+| `message` | `string` | `''` | Updated body message text |
+| `type` | `MessageDialogType \| null` | `null` | Updated category type (retains previous if null/omitted) |
+| `actions` | `MessageDialogActionOption[]` | `[]` | Updated action buttons array |
+| `renderContent` | `(() => React.ReactNode) \| null` | `null` | Updated custom render function |
+| `customConfig` | `Record<string, unknown> \| null` | `null` | Merged metadata payload |
 
 ### `MessageDialogActionOption`
+
 Buttons are powered by `@codexporer.io/expo-button`:
-| Property | Type | Description |
-| :--- | :--- | :--- |
-| `text` | `string` | Button title label |
-| `handler` | `() => void` | Callback invoked on button press |
-| `variant` | `ButtonVariant` | Button styling variant (`Primary`, `Secondary`, `Outline`, `Ghost`, etc.) |
-| `size` | `ButtonSize` | Button size preset (`Small`, `Medium`, `Large`) |
-| `isDisabled` | `boolean` | Whether action button is disabled |
-| `id` | `string \| number` | Optional unique identifier |
+
+| Property | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `text` | `string` | *Required* | Button title label |
+| `handler` | `() => void` | — | Callback invoked on button press |
+| `variant` | `ButtonVariant` | `ButtonVariant.Secondary` | Button styling variant (`Primary`, `Secondary`, `Outline`, `Ghost`, etc.) |
+| `size` | `ButtonSize` | `ButtonSize.Small` | Button size preset (`Small`, `Medium`, `Large`) |
+| `isDisabled` | `boolean` | `false` | Whether action button is disabled |
+| `id` | `string \| number` | — | Optional unique identifier |
 
 ### State Inspection Hooks
-- `useMessageDialogState()`: Subscribes to the complete dialog state (`{ isOpen, title, message, type, actions, customConfig }`).
-- `useMessageDialogCustomConfig()`: Selector hook returning only the custom config payload object.
+- `useMessageDialogState()`: Subscribes to the complete dialog state (`MessageDialogState`: `{ isOpen, title, message, renderContent, type, actions, onOpen, onClose, customConfig }`).
+- `useMessageDialogCustomConfig()`: Selector hook returning only the `customConfig` payload object.
 
 ---
 
@@ -137,8 +178,12 @@ Buttons are powered by `@codexporer.io/expo-button`:
 1. **Mounting**: Always mount `<MessageDialog />` inside `ThemeProvider`. Never look for or create a `MessageDialogProvider`.
 2. **Destructured Actions Pattern**: ALWAYS destructure:
    ```tsx
-   const { open, close } = useMessageDialogActions();
+   const { open, updateState, close } = useMessageDialogActions();
    ```
+   Do NOT use optional chaining (`?.`) on `open` or `close`.
 3. **Use `MessageDialogType` Enum**: Never pass raw strings like `'info'` or `'error'` for dialog type; always use `MessageDialogType.Info`, `MessageDialogType.Warning`, `MessageDialogType.Error`, or `MessageDialogType.None`.
 4. **Use `ButtonVariant` & `ButtonSize`**: When specifying button variants and sizes in dialog `actions`, import and use `ButtonVariant` and `ButtonSize` from `@codexporer.io/expo-button`.
 5. **Dismissal**: Handlers that perform an action should explicitly call `close()` when finished unless intentional persistence is required.
+6. **Modal Back Behavior**: Android hardware back button triggers `onDismiss={close}` (`dismissOnHardwareBackPress={true}`), while backdrop tap is disabled (`dismissOnBackdropPress={false}`).
+7. **All 8 Peer Dependencies Required**: Consuming applications must install all 8 peer dependencies without marking any as optional.
+
